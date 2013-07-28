@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="publish" name="applet">
+	
+	 <target name="init">
+	  <property name="author" value="diyong" />
+	  <property name="Name" value="applet" />
+	  <property name="name" value="applet" />
+	  <property name="version" value="0.1" />
+	  <property name="year" value="2010" />
+
+	  <echo message="----------- ${Name} ${version} [${year}] ------------" />
+
+	  <property name="debug" value="off" />
+	  <property name="optimize" value="on" />
+	  <property name="deprecation" value="on" />
+
+	  <!--<property name="mycedatasycn.location" value="D:/project/myce/mycedatasycn" />-->
+
+	<!--   java源文件路径 -->
+	  <property name="src.dir" value="${basedir}/src" />
+
+	<!--   jar包路径 -->
+	  <property name="lib.dir" value="${basedir}/lib" />
+
+	<!--   准备源文件路径 -->
+	  <property name="build.src" value="${basedir}/AntBuild/build_src" />
+
+	<!--   准备javadoc文件路径 -->
+	  <property name="build.javadocs" value="${basedir}/AntBuild/doc" />
+
+	<!--   classes文件路径 -->
+	  <property name="classes.dest" value="${basedir}/AntBuild/bin" />
+
+	<!--   打包jar文件路径  jar文件名-->
+	  <property name="jar.dest" value="${basedir}/AntBuild/jar" />
+	  <property name="jar.file" value="${name}_${version}.jar" />
+
+	<!--   classpath -->
+	  <path id="classpath">
+	  	<fileset dir="${lib.dir}">
+	  		<include name="**/*.jar"/>
+	  	</fileset>
+	  </path>
+
+	  <filter token="year" value="${year}" />
+	  <filter token="version" value="${version}" />
+	  <filter token="date" value="${TODAY}" />
+	  <filter token="log" value="true" />
+	  <filter token="verbose" value="true" />
+
+	 </target>
+
+
+
+	  <!-- =================================================================== -->
+	 <!-- Help on usage -->
+	 <!-- =================================================================== -->
+	 <target name="usage" depends="init">
+	  <echo message="${Name} Build file" />
+	  <echo message="-------------------------------------------------------------" />
+	  <echo message="" />
+	  <echo message=" available targets are:" />
+	  <echo message="" />
+	  <echo message=" jar --> generates the ${name}.jar file" />
+	  <echo message=" build --> compiles the source code" />
+	  <echo message=" javadoc --> generates the API documentation" />
+	  <echo message=" clean --> cleans up the directory" />
+	  <echo message="" />
+	  <echo message=" Please rename build.properties.default to build.properties" />
+	  <echo message=" and edit build.properties to specify JSDK 2.3 classpath." />
+	  <echo message="" />
+	  <echo message=" See the comments inside the build.xml file for more details." />
+	  <echo message="-------------------------------------------------------------" />
+	  <echo message="" />
+	  <echo message="" />
+	 </target>
+
+
+	 <!-- =================================================================== -->
+	 <!-- 准备源文件-->
+	 <!-- =================================================================== -->
+	 <target name="prepare-src" depends="init">
+	  <!-- create directories -->
+	  <mkdir dir="${build.src}" />
+	  <mkdir dir="${classes.dest}" />
+	  <mkdir dir="${jar.dest}" />
+	  
+	  <!-- copy src files -->
+	  <copy todir="${build.src}">
+	   <fileset dir="${src.dir}" />
+	  </copy>
+	 </target>
+
+
+
+	 <!-- =================================================================== -->
+	 <!-- 编译源文件-->
+	 <!-- =================================================================== -->
+	 <target name="build" depends="prepare-src">
+	  <javac srcdir="${build.src}" destdir="${classes.dest}" debug="${debug}" optimize="${optimize}" encoding="utf-8">
+	   <classpath refid="classpath" />
+	  </javac>
+	  <copy todir="${classes.dest}">
+	   <fileset dir="${build.src}" >
+	    <include name="**/*.xml"/>
+	    <include name="**/*.txt"/>
+	    <include name="**/*.properties"/>
+	   </fileset>
+	  </copy>
+	 </target>
+
+	
+	<!-- =================================================================== -->
+	<!-- 打jar包-->
+	<!-- =================================================================== -->
+	<target name="applet.jar" depends="build">
+		<jar destfile="${jar.dest}/${jar.file}">
+			<fileset dir="${classes.dest}">
+				<include name="**/*.class"/>
+				<include name="**/*.*"/>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="my.applet.swing.MainFrame"/>
+				<attribute name="Created-By" value="${author}"/>
+				
+				<attribute name="Class-Path" value="./lib/borland.jar ./lib/log4j-1.2.8.jar ./lib/pinyin4j-2.5.0.jar ./lib/lucene-core-1.9.1.jar"/>
+			</manifest>
+		</jar>
+	</target> 
+
+
+	 <!-- =================================================================== -->
+	 <!-- 发布到本的resin和tomcat-->
+	 <!-- =================================================================== -->
+
+	 <target name="publish" depends="applet.jar,clean,baseline">
+	   <copy todir="${basedir}">
+	   <fileset dir="${jar.dest}" >
+	    <include name="**/*.jar"/>
+	   </fileset>
+	  </copy>
+	  
+	 </target>
+	 <!--
+	 <target name="SyncMain">
+	         <java classname="com.ce.synchronization.main.SyncMain" failonerror="true" fork="yes">
+	             <classpath refid="classpath"/>
+	         </java>
+	 </target>
+	 -->
+	 <!-- =================================================================== -->
+	
+	 <!-- =================================================================== -->
+	
+	 <!-- =================================================================== -->
+	 <!-- 清除临时文件-->
+	 <!-- =================================================================== -->
+	<target name="clean" depends="init">
+		  <delete dir="${build.src}"/>
+		  <delete>
+		   <fileset dir="${classes.dest}" includes="**/*.*"/>
+		  </delete>
+		<delete dir="${classes.dest}"/>
+	 </target>
+
+	<target name="baseline" description="Record build information">
+		<propertyfile file="${jar.dest}/build.info">
+		<!-- Initial build number is 0001. Then, any subsequent build increments
+		 this number by one  each time. -->
+		<entry default="0001" key="build.number" operation="+" pattern="0000" type="int" />
+		<!-- Records the current time to the same file. -->
+		<entry default="now" key="build.time" pattern="yyyy-MM-dd HH:mm" type="date" />
+		</propertyfile>
+	</target>
+</project>
+
