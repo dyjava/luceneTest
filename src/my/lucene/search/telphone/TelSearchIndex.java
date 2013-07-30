@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import my.config.Config;
 import my.lucene.search.SearchFactory;
 
 import org.apache.lucene.queryParser.ParseException;
@@ -25,7 +26,7 @@ public class TelSearchIndex {
 	
 	public List<Tel> queryIndex(String key){
 		try {
-			return factory.search(key, searchKey, Tel.class, 10) ;
+			return factory.search(key, Tel.class) ;
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -65,5 +66,16 @@ public class TelSearchIndex {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static void main(String[] args){
+		TelSearchIndex index = new TelSearchIndex(TelConfig.indexDir ,Config.querykey) ;
+		
+		String key = "保定" ;
+		List<Tel> list = index.queryIndex(key ) ;
+		
+		for(Tel t:list){
+			System.out.println(t.getCity()) ;
+		}
 	}
 }

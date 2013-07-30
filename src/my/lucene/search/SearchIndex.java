@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 
 public class SearchIndex {
+	private static Logger log = Logger.getLogger(SearchIndex.class.getName());
 
 	private static Hashtable<String,IndexReader> readertable = new Hashtable<String,IndexReader>() ;	//redertables
 	private String key ;	//readertable  key
@@ -89,19 +91,28 @@ public class SearchIndex {
 	
 	/**
 	 * get indexsearcher
-	 * @param name
 	 * @return
 	 * @throws IOException 
 	 * @throws CorruptIndexException 
 	 */
 	protected IndexSearcher getIndexSearcher() 
 			throws CorruptIndexException, IOException {
+		long start = System.currentTimeMillis() ;
+		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|getIndexSearcher|") ;
+		logs.append(key).append("|") ;
+		
 		if(!readertable.keySet().contains(key)){
+			logs.append(1) ;
 			this.getIndexReader() ;
+		} else {
+			logs.append(0) ;
 		}
 
 		IndexReader reader = readertable.get(key) ;
 	    IndexSearcher searcher = new IndexSearcher(reader);
+	    
+	    logs.append("|").append(System.currentTimeMillis()-start) ;
+	    log.debug(logs) ;
 	    return searcher ;
 	}
 	

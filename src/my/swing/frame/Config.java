@@ -26,8 +26,8 @@ public class Config {
 				out = Pinyin4j.getPinYin(input)+"\r\n"+input;
 //			} else if(type.equals("post")){
 //				out = PostMain.getInstance().searchToString(input) ;
-//			} else if(type.equals("city")){
-//				out = CityMain.getInstance().searchCity(input) ;
+			} else if(type.equals("city")){
+				out = CityMain.getInstance().searchCity(input) ;
 			}
 		} catch (BadHanyuPinyinOutputFormatCombination e) {
 			// TODO Auto-generated catch block

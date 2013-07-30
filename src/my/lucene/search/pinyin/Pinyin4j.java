@@ -10,7 +10,7 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
 import org.apache.log4j.Logger;
 
 /** 
- * by dyong 2010-7-19
+ * by dyong 
  */
 public class Pinyin4j {
 	private static Logger log = Logger.getLogger(Pinyin4j.class.getName());

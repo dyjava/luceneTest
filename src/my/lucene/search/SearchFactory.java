@@ -9,6 +9,7 @@ import java.util.List;
 
 import my.config.Config;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.queryParser.ParseException;
@@ -20,19 +21,21 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 
 public class SearchFactory extends SearchIndex{
-	
+	private static Logger log = Logger.getLogger(SearchFactory.class.getName());
+
 	private static SearchFactory factory ;
+	private SearchFactory(File indexdir, boolean ram){
+		super(indexdir, ram) ;
+	}
+	private SearchFactory(File indexdir){
+		super(indexdir) ;
+	}
+
 	public static SearchFactory getinstens(File indexdir){
 		if(factory==null){
 			factory = new SearchFactory(indexdir) ;
 		}
 		return factory ;
-	}
-	public SearchFactory(File indexdir, boolean ram){
-		super(indexdir, ram) ;
-	}
-	public SearchFactory(File indexdir){
-		super(indexdir) ;
 	}
 	
 	/**
@@ -49,12 +52,15 @@ public class SearchFactory extends SearchIndex{
 	@SuppressWarnings("unchecked")
 	public <T> List<T> search(String keyword,Class<?> T)
 			throws ParseException, IOException, InvalidTokenOffsetsException, InstantiationException, IllegalAccessException{
+		long start = System.currentTimeMillis() ;
+		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
+		logs.append(keyword).append("|") ;
 		
 		QueryParser parser = new QueryParser(Config.VERSION, Config.querykey, Config.analyzer);
 		Query query = parser.parse(keyword);
 		
 		IndexSearcher isearcher = this.getIndexSearcher() ;
-		TopDocs topDocs = isearcher.search(query, 10) ;
+		TopDocs topDocs = isearcher.search(query, 50) ;
 //		TopDocs topDocs2 = this.getIndexSearcher(name).searchAfter(after, query, 10);
 		ScoreDoc[] hits = topDocs.scoreDocs;
 //		Formatter formatter = new SimpleHTMLFormatter("<font color='red'>", "</font>");
@@ -79,6 +85,8 @@ public class SearchFactory extends SearchIndex{
 //			}
 //			System.out.println("doc:" + scoreDoc.doc + "    score:" + score + "   id:" + id + "   title:" + title + "    content:" + content);
 		}
+		logs.append(list.size()).append("|").append(System.currentTimeMillis()-start) ;
+	    log.debug(logs) ;
 		return list ;
 	}
 
@@ -97,6 +105,9 @@ public class SearchFactory extends SearchIndex{
 	@SuppressWarnings("unchecked")
 	public <T> List<T> search(String keyword,String trem,Class<?> T,int limit)
 			throws ParseException, IOException, InvalidTokenOffsetsException, InstantiationException, IllegalAccessException{
+		long start = System.currentTimeMillis() ;
+		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
+		logs.append(keyword).append(",").append(trem).append(",").append(limit).append("|") ;
 		
 		QueryParser parser = new QueryParser(Config.VERSION, trem, Config.analyzer);
 		Query query = parser.parse(keyword);
@@ -110,12 +121,31 @@ public class SearchFactory extends SearchIndex{
 			Document hitDoc = isearcher.doc(scoreDoc.doc);
 			list.add((T) this.doc2Object(hitDoc, T)) ;
 		}
+		
+		logs.append(list.size()).append("|").append(System.currentTimeMillis()-start) ;
+	    log.debug(logs) ;
 		return list ;
 		
 	}
+	
+	/**
+	 * 
+	 * @param query
+	 * @param T
+	 * @param limit
+	 * @return
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws InvalidTokenOffsetsException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> search(Query query,Class<?> T,int limit)
 			throws ParseException, IOException, InvalidTokenOffsetsException, InstantiationException, IllegalAccessException{
+		long start = System.currentTimeMillis() ;
+		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
+		logs.append(query.toString()).append("|") ;
 		
 		IndexSearcher isearcher = this.getIndexSearcher() ;
 		TopDocs topDocs = isearcher.search(query, limit) ;
@@ -126,6 +156,9 @@ public class SearchFactory extends SearchIndex{
 			Document hitDoc = isearcher.doc(scoreDoc.doc);
 			list.add((T) this.doc2Object(hitDoc, T)) ;
 		}
+		
+		logs.append(list.size()).append("|").append(System.currentTimeMillis()-start) ;
+	    log.debug(logs) ;
 		return list ;
 		
 	}
@@ -159,10 +192,6 @@ public class SearchFactory extends SearchIndex{
 		}
 		Field[] fs = clas.getDeclaredFields();	//获取私有属性。
 		for(Field f:fs){
-//			List<Fieldable> fields = doc.getFields() ;
-//			for(Fieldable fd:fields){
-//				String name = fd.name() ;
-//			}
 			if(doc.get(f.getName())!=null){
 				f.setAccessible(true);//设置私有、保护变量的可以访问权限。
 				try {
@@ -198,12 +227,13 @@ public class SearchFactory extends SearchIndex{
 			try {
 				String value = doc.get(name) ;
 				Class<?> type = f.getType() ;
+				//类型匹配
 				if(type.toString().equals("int")){
 					f.set(bean, Integer.parseInt(value)) ;
 				} else if(type.toString().equals("class java.lang.String")){
 					f.set(bean, value) ;
 				} else {
-					f.set(bean, value) ;
+					f.set(bean, value) ;//对象赋值
 				}
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
