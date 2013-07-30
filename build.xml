@@ -11,7 +11,7 @@
 	  <property name="Name" value="applet" />
 	  <property name="name" value="applet" />
 	  <property name="version" value="0.1" />
-	  <property name="year" value="2010" />
+	  <property name="year" value="2013" />
 
 	  <echo message="----------- ${Name} ${version} [${year}] ------------" />
 
@@ -125,10 +125,10 @@
 				<include name="**/*.*"/>
 			</fileset>
 			<manifest>
-				<attribute name="Main-Class" value="my.applet.swing.MainFrame"/>
+				<attribute name="Main-Class" value="my.swing.frame.MainFrame"/>
 				<attribute name="Created-By" value="${author}"/>
 				
-				<attribute name="Class-Path" value="./lib/borland.jar ./lib/log4j-1.2.8.jar ./lib/pinyin4j-2.5.0.jar ./lib/lucene-core-1.9.1.jar"/>
+				<attribute name="Class-Path" value="./lib/borland.jar ./lib/log4j-1.2.8.jar ./lib/pinyin4j-2.5.0.jar ./lib/lucene-core-3.0.1.jar ./lib/lucene-highlighter-3.0.1.jar ./lib/lucene-analyzers.jar"/>
 			</manifest>
 		</jar>
 	</target> 
