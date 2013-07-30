@@ -70,12 +70,13 @@ public class TelSearchIndex {
 	
 	public static void main(String[] args){
 		TelSearchIndex index = new TelSearchIndex(TelConfig.indexDir ,Config.querykey) ;
+		index.factory.setHightline(true) ;//高亮显示
 		
 		String key = "保定" ;
 		List<Tel> list = index.queryIndex(key ) ;
 		
 		for(Tel t:list){
-			System.out.println(t.getCity()) ;
+			System.out.println(t.getCity()+t.getProv()+t.getTel()) ;
 		}
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import my.config.Config;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Fieldable;
@@ -17,6 +18,7 @@ import org.apache.lucene.store.FSDirectory;
 public class IndexFactory {
 	
 	private File dataFile ;
+	private Analyzer analyzer = Config.analyzer ;	//分词器
 	public IndexFactory(File dataFile){
 		this.dataFile = dataFile ;
 	}
@@ -89,7 +91,7 @@ public class IndexFactory {
     private IndexWriter getIndexWriter() throws IOException{
         //创建IndexWriter对象,第一个参数是Directory,第二个是分词器,第三个表示是否是创建,如果为false为在此基础上面修改,第四表示表示分词的最大值，比如说new MaxFieldLength(2)，就表示两个字一分，一般用IndexWriter.MaxFieldLength.LIMITED 
         Directory directory = FSDirectory.open(dataFile) ;
-        IndexWriter writer = new IndexWriter(directory, Config.analyzer,true,IndexWriter.MaxFieldLength.UNLIMITED) ;
+        IndexWriter writer = new IndexWriter(directory, analyzer,true,IndexWriter.MaxFieldLength.UNLIMITED) ;
         return writer ;
     }
     
@@ -127,6 +129,13 @@ public class IndexFactory {
 		//将所有字段拼接成一个全字段搜索字段
 		doc.add(new Field(Config.querykey, buf.toString(), Field.Store.YES, Field.Index.ANALYZED)) ;
 		return doc ;
+	}
+
+	public Analyzer getAnalyzer() {
+		return analyzer;
+	}
+	public void setAnalyzer(Analyzer analyzer) {
+		this.analyzer = analyzer;
 	}
 	
 }

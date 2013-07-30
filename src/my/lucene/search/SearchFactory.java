@@ -18,12 +18,19 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.highlight.Formatter;
+import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.Scorer;
+import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 
 public class SearchFactory extends SearchIndex{
 	private static Logger log = Logger.getLogger(SearchFactory.class.getName());
 
 	private static SearchFactory factory ;
+	private boolean hightline ;
+	private Highlighter highlighter ;
 	private SearchFactory(File indexdir, boolean ram){
 		super(indexdir, ram) ;
 	}
@@ -56,8 +63,9 @@ public class SearchFactory extends SearchIndex{
 		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
 		logs.append(keyword).append("|") ;
 		
-		QueryParser parser = new QueryParser(Config.VERSION, Config.querykey, Config.analyzer);
+		QueryParser parser = new QueryParser(Config.VERSION, Config.querykey, analyzer);
 		Query query = parser.parse(keyword);
+		this.setHightlighter(query) ;
 		
 		IndexSearcher isearcher = this.getIndexSearcher() ;
 		TopDocs topDocs = isearcher.search(query, 50) ;
@@ -109,8 +117,9 @@ public class SearchFactory extends SearchIndex{
 		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
 		logs.append(keyword).append(",").append(trem).append(",").append(limit).append("|") ;
 		
-		QueryParser parser = new QueryParser(Config.VERSION, trem, Config.analyzer);
+		QueryParser parser = new QueryParser(Config.VERSION, trem, analyzer);
 		Query query = parser.parse(keyword);
+		this.setHightlighter(query) ;
 		
 		IndexSearcher isearcher = this.getIndexSearcher() ;
 		TopDocs topDocs = isearcher.search(query, limit) ;
@@ -146,6 +155,8 @@ public class SearchFactory extends SearchIndex{
 		long start = System.currentTimeMillis() ;
 		StringBuffer logs = new StringBuffer(this.getClass().getName()).append("|search|") ;
 		logs.append(query.toString()).append("|") ;
+
+		this.setHightlighter(query) ;
 		
 		IndexSearcher isearcher = this.getIndexSearcher() ;
 		TopDocs topDocs = isearcher.search(query, limit) ;
@@ -160,7 +171,6 @@ public class SearchFactory extends SearchIndex{
 		logs.append(list.size()).append("|").append(System.currentTimeMillis()-start) ;
 	    log.debug(logs) ;
 		return list ;
-		
 	}
 	
 	/**
@@ -231,6 +241,19 @@ public class SearchFactory extends SearchIndex{
 				if(type.toString().equals("int")){
 					f.set(bean, Integer.parseInt(value)) ;
 				} else if(type.toString().equals("class java.lang.String")){
+					//针对字符串字段，高亮显示
+					if(hightline){
+						try {
+							String hvalue = highlighter.getBestFragment(analyzer, name, value);
+							if(hvalue!=null && hvalue.trim().length()>0){
+								value = hvalue ;
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (InvalidTokenOffsetsException e) {
+							e.printStackTrace();
+						}
+					}
 					f.set(bean, value) ;
 				} else {
 					f.set(bean, value) ;//对象赋值
@@ -245,5 +268,21 @@ public class SearchFactory extends SearchIndex{
 		}
 		
 	}
+	public boolean isHightline() {
+		return hightline;
+	}
+	public void setHightline(boolean hightline) {
+		this.hightline = hightline;
+	}
+	private void setHightlighter(Query query){
+		if(!hightline){
+			return ;
+		}
+		Formatter formatter = new SimpleHTMLFormatter("<font color='red'>", "</font>");
+		Scorer scorer = new QueryScorer(query);
+		highlighter = new Highlighter(formatter, scorer);
+	}
+	
+	
 	
 }
