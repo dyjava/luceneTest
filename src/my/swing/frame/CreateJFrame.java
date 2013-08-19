@@ -105,7 +105,7 @@ public class CreateJFrame extends JFrame {
 
     private void runBut_actionPerformed(ActionEvent e) {
 //    	更新表格数据
-        List data = new ArrayList();
+        List<Object> data = new ArrayList<Object>();
         List<String> title = new ArrayList<String>();
     	new Config().getTableData(title, data, this) ;
     	

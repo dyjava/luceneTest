@@ -91,6 +91,9 @@ public class SearchIndex {
 	 */
 	private IndexReader getIndexReader() 
 			throws CorruptIndexException, IOException{
+		if(readertable.keySet().contains(key)){
+			return readertable.get(key) ;
+		}
 		FSDirectory directory = FSDirectory.open(indexdir);
 		IndexReader reader = IndexReader.open(directory);
 		readertable.put(key, reader) ;

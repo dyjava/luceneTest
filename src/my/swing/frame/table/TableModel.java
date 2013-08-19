@@ -9,6 +9,10 @@ import javax.swing.table.AbstractTableModel;
  */
 public class TableModel extends AbstractTableModel{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1528193405633512891L;
 	protected List<Object> data ;
 	protected List<String> title ;
 	
@@ -22,9 +26,10 @@ public class TableModel extends AbstractTableModel{
     public int getRowCount() { // 取得表格行数
         return data.size();
     }
-    public Object getValueAt(int row, int col) { // 取得单元格中的属性值
+    @SuppressWarnings("unchecked")
+	public Object getValueAt(int row, int col) { // 取得单元格中的属性值
         if (!data.isEmpty()) {
-        	return ((List)data.get(row)).get(col) ;
+        	return ((List<Object>)data.get(row)).get(col) ;
         } else {
             return null;
         }
@@ -35,7 +40,7 @@ public class TableModel extends AbstractTableModel{
     public String getColumnName(int col) { // 取得表格列名
         return (String) title.get(col) ;
     }
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Class getColumnClass(int c) { // 取得列所属对象类
         return getValueAt(0, c).getClass();
     }

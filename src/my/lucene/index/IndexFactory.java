@@ -17,17 +17,21 @@ import org.apache.lucene.store.FSDirectory;
 
 public class IndexFactory {
 	
-	private File dataFile ;
+	private File indexfile ;						//索引保存文件
 	private Analyzer analyzer = Config.analyzer ;	//分词器
-	public IndexFactory(File dataFile){
-		this.dataFile = dataFile ;
+	public IndexFactory(File indexfile){
+		this.indexfile = indexfile ;
 	}
 
+	/**
+	 * 创建索引
+	 * @param datas
+	 */
 	public <T> void bulidIndex(List<T> datas){
         IndexWriter writer = null;
         try {
-
         	writer = this.getIndexWriter() ;
+        	//顺序写入索引数据
             for(T t:datas){
             	Document doc = this.getDocument(t) ;
             	writer.addDocument(doc) ;
@@ -90,7 +94,7 @@ public class IndexFactory {
      */
     private IndexWriter getIndexWriter() throws IOException{
         //创建IndexWriter对象,第一个参数是Directory,第二个是分词器,第三个表示是否是创建,如果为false为在此基础上面修改,第四表示表示分词的最大值，比如说new MaxFieldLength(2)，就表示两个字一分，一般用IndexWriter.MaxFieldLength.LIMITED 
-        Directory directory = FSDirectory.open(dataFile) ;
+        Directory directory = FSDirectory.open(indexfile) ;
         IndexWriter writer = new IndexWriter(directory, analyzer,true,IndexWriter.MaxFieldLength.UNLIMITED) ;
         return writer ;
     }
@@ -103,7 +107,6 @@ public class IndexFactory {
      * @throws IllegalAccessException
      */
 	protected <T> Document getDocument(T obj) throws IllegalArgumentException, IllegalAccessException{
-
         Document doc = new Document();
         //Field.Index.NO 表示不索引
         //Field.Index.ANALYZED 表示分词且索引
@@ -117,9 +120,12 @@ public class IndexFactory {
 			Object value = f.get(obj) ;
 			if(value!=null){
 				Fieldable field;
+				//字符串分词、存储，其他信息不分词
 				if(value instanceof String){
 					buf.append(value.toString()).append("|") ;
 					field = new Field(name, value.toString(), Field.Store.YES, Field.Index.ANALYZED) ;
+				} else if(value instanceof Integer){
+					field = new Field(name, value.toString(), Field.Store.YES, Field.Index.NOT_ANALYZED) ;
 				} else {
 					field = new Field(name, value.toString(), Field.Store.YES, Field.Index.NOT_ANALYZED) ;
 				}
@@ -136,6 +142,9 @@ public class IndexFactory {
 	}
 	public void setAnalyzer(Analyzer analyzer) {
 		this.analyzer = analyzer;
+	}
+	public void setIndexfile(File indexfile) {
+		this.indexfile = indexfile;
 	}
 	
 }

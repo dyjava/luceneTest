@@ -44,12 +44,12 @@ public class Config {
 				title.add("类型") ;
 				title.add("数据") ;
 				
-				List list = new ArrayList() ;
+				List<String> list = new ArrayList<String>() ;
 				list.add("输入") ;
 				list.add(input) ;
 				data.add(list) ;
 				
-				list = new ArrayList() ;
+				list = new ArrayList<String>() ;
 				list.add("输出") ;
 				list.add(Pinyin4j.getPinYin(input)) ;
 				data.add(list) ;

@@ -74,6 +74,7 @@ public class Pinyin4j {
 	 * @param s 
 	 * @return 
 	 */  
+	@SuppressWarnings("unused")
 	private static String capitalize(String s) {
 		char ch[];
 	    ch = s.toCharArray();
