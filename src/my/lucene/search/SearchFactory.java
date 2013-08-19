@@ -39,9 +39,7 @@ public class SearchFactory extends SearchIndex{
 	}
 
 	public static SearchFactory getinstens(File indexdir){
-		if(factory==null){
-			factory = new SearchFactory(indexdir) ;
-		}
+		factory = new SearchFactory(indexdir) ;
 		return factory ;
 	}
 	

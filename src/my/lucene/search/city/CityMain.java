@@ -17,6 +17,7 @@ public class CityMain {
 	
 	private static CityMain instance ;
 	private CityMain(){
+		log.info(indexDir) ;
 		INDEX_DIR = indexDir ;
 	}
 	public static CityMain getInstance(){
